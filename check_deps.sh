@@ -1,12 +1,7 @@
 #!/bin/bash
 set -e
 
-clone_repo() {
-    local repo_url=$1
-    local to=$2
-
-    git clone -q "${repo_url}" "${to}"
-}
+source ./lib.sh
 
 newer_significant_commits() {
     local go_mod_line=$1
