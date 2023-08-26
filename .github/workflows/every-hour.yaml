@@ -1,0 +1,23 @@
+name: Hourly periodics
+
+on:
+  push:
+    branches:
+      - 'main'
+  schedule:
+      # every hour
+    - cron: '0 * * * *'
+
+jobs:
+  check-deps-all-repos:
+    name: Check deps on all repos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project code
+        uses: actions/checkout@v3
+      - name: Setup repos
+        run: |
+          ./setup_repos.sh
+      - name: Check deps
+        run: |
+          ./check_deps_all_repos.sh
