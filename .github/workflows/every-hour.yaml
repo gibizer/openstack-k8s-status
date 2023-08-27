@@ -20,4 +20,6 @@ jobs:
           ./setup_repos.sh
       - name: Check deps
         run: |
-          ./check_deps_all_repos.sh
+          ./check_deps_all_repos.sh | tee -a result.txt
+      - name: Publish result
+        run: cat result.txt >> $GITHUB_STEP_SUMMARY
