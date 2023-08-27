@@ -70,8 +70,9 @@ do
     if [ ! -z "${newer}" ];
     then
         errors=$((errors + 1))
-        echo "New significant commits since ${go_mod_line}:"
-        echo "${newer}"
+        echo "New since ${go_mod_line}:"
+        echo "$newer" | sed -e 's|^|* |'
+        echo
     fi
 done < <(grep openstack-k8s-operators ${go_mod_file} | grep -v $own_mod | grep -v replace | grep -v lib-common)
 
