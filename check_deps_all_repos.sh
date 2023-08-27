@@ -3,7 +3,7 @@ set -e
 
 WORK_DIR='./repos'
 
-echo "## Outdated dependencies:"
+echo "## Outdated api(s) dependencies"
 
 for repo in "$WORK_DIR/"*/ ; do
     if [[ $repo =~ "lib-common" ]];
