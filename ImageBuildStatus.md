@@ -1,4 +1,4 @@
-# openstack-k8s-status
+# Post merge image build status
 
 * [![Cinder Operator image builder](https://github.com/openstack-k8s-operators/cinder-operator/actions/workflows/build-cinder-operator.yaml/badge.svg)](https://github.com/openstack-k8s-operators/cinder-operator/actions/workflows/build-cinder-operator.yaml)
 * [![DataPlane Operator image builder](https://github.com/openstack-k8s-operators/dataplane-operator/actions/workflows/build-dataplane-operator.yaml/badge.svg)](https://github.com/openstack-k8s-operators/dataplane-operator/actions/workflows/build-dataplane-operator.yaml)
