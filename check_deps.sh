@@ -23,7 +23,7 @@ newer_significant_commits() {
 
     pushd ${local} > /dev/null
 
-    newer_commits=$(git log --oneline  ${hash}..${branch} -- ${dep_api_dir})
+    newer_commits=$(git log --no-merges --oneline  ${hash}..${branch} -- ${dep_api_dir})
 
     popd > /dev/null
 
