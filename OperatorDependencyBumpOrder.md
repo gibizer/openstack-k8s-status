@@ -19,11 +19,11 @@
 * [github.com/openstack-k8s-operators/manila-operator](http://github.com/openstack-k8s-operators/manila-operator)
 * [github.com/openstack-k8s-operators/neutron-operator](http://github.com/openstack-k8s-operators/neutron-operator)
 * [github.com/openstack-k8s-operators/nova-operator](http://github.com/openstack-k8s-operators/nova-operator)
+* [github.com/openstack-k8s-operators/octavia-operator](http://github.com/openstack-k8s-operators/octavia-operator)
 * [github.com/openstack-k8s-operators/placement-operator](http://github.com/openstack-k8s-operators/placement-operator)
 * [github.com/openstack-k8s-operators/swift-operator](http://github.com/openstack-k8s-operators/swift-operator)
 ## Batch 4
 * [github.com/openstack-k8s-operators/glance-operator](http://github.com/openstack-k8s-operators/glance-operator)
-* [github.com/openstack-k8s-operators/octavia-operator](http://github.com/openstack-k8s-operators/octavia-operator)
 * [github.com/openstack-k8s-operators/telemetry-operator](http://github.com/openstack-k8s-operators/telemetry-operator)
 ## Batch 5
 * [github.com/openstack-k8s-operators/openstack-operator](http://github.com/openstack-k8s-operators/openstack-operator)
