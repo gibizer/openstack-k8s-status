@@ -5,8 +5,7 @@ source ./lib.sh
 
 clone_all() {
 
-    while read -r repo;
-    do
+    while read -r repo; do
         name=$(echo "$repo"| cut -d '/' -f3)
         clone_repo "http://$repo" "$WORK_DIR/$name"
     done < repo_list.txt
