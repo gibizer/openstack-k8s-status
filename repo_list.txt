@@ -20,3 +20,4 @@ github.com/openstack-k8s-operators/ovn-operator
 github.com/openstack-k8s-operators/placement-operator
 github.com/openstack-k8s-operators/swift-operator
 github.com/openstack-k8s-operators/telemetry-operator
+github.com/openstack-k8s-operators/test-operator
