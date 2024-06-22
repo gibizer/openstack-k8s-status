@@ -16,5 +16,5 @@ repos:
     rev: 2.1.1
     hooks:
       - id: bashate
-        entry: bashate --error .
+        entry: bashate --error . --ignore E006
         verbose: false

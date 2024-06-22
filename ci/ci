@@ -6,12 +6,14 @@ shopt -s globstar
 
 download_logs() {
     log_base="$1"
-    
+
     rel_sos_path="ci-framework-data/logs/openstack-k8s-operators-openstack-must-gather/sos-reports/_all_nodes/"
     rel_tempest_log_path="ci-framework-data/tests/test_operator/tempest-tests/tempest.log"
 
-    wget -q --show-progress -e robots=off -A '*.tar.xz' --no-parent --recursive --level=1 --no-directories "$log_base$rel_sos_path"
-
+    wget \
+        -q --show-progress -e robots=off -A '*.tar.xz' \
+        --no-parent --recursive --level=1 --no-directories \
+        "$log_base$rel_sos_path"
 
     shopt -s nullglob
 
@@ -41,12 +43,14 @@ download_logs() {
 
     wget -q --show-progress "$log_base$rel_tempest_log_path" || true
 
-    ln -s $(eval "ls podlogs/*/pods/*/tempest-tests-tests-runner/0.log") tempest-pod.log || true
+    ln -s "$(
+        eval "ls podlogs/*/pods/*/tempest-tests-tests-runner/0.log"
+    )" tempest-pod.log || true
 }
 
 download_namespaces() {
     log_base="$1"
-   
+
     rel_namespaces_path="ci-framework-data/logs/openstack-k8s-operators-openstack-must-gather/namespaces/"
     namespaces=(
         "openstack"
@@ -55,12 +59,13 @@ download_namespaces() {
         "openshift-machine-api"
         "openshift-nmstate"
     )
-    
-    printf "%s\n"  "${namespaces[@]}" | 
-        xargs -P "${#namespaces[@]}" -I {} \
-            wget -q --show-progress -e robots=off --no-parent --recursive -R '*index.html*' \
-                $log_base$rel_namespaces_path{}/
 
+    printf "%s\n"  "${namespaces[@]}" |
+        xargs -P "${#namespaces[@]}" -I {} \
+            wget \
+                -q --show-progress -e robots=off \
+                --no-parent --recursive -R '*index.html*' \
+                "$log_base$rel_namespaces_path"{}/
 
 }
 
@@ -69,7 +74,7 @@ download_namespace() {
     log_base="$2"
 
     rel_namespaces_path="ci-framework-data/logs/openstack-k8s-operators-openstack-must-gather/namespaces/"
- 
+
     wget \
         -q --show-progress -e robots=off \
         --no-parent --recursive -R '*index.html*' \
@@ -81,13 +86,17 @@ _get_k8s_resources() {
     namespace=$1
     kind=$2  # e.g. statefulset, configmap, secret, cr/openstackcontrolplane
 
-    find ./logserver.rdoproject.org/**/namespaces/$namespace/$kind* -name "*.yaml"
+    # we want globbing to happen
+    # shellcheck disable=SC2086
+    find \
+        ./logserver.rdoproject.org/**/namespaces/$namespace/$kind* \
+        -name "*.yaml"
 }
 
 _assert_crs_of_a_kind_ready() {
-    kind=$(echo $1 | tr '[:upper:]' '[:lower:]')
+    kind=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 
-    crs=$(_get_k8s_resources openstack crs/$kind)
+    crs=$(_get_k8s_resources openstack "crs/$kind")
     if [[ -z $crs ]]; then
         echo "No $kind CRs found"
         return 1
@@ -97,12 +106,15 @@ _assert_crs_of_a_kind_ready() {
     for cr in $crs ; do
         name=$(yq < "$cr" '.metadata.name' -o yaml)
         kind=$(yq < "$cr" '.kind' -o yaml)
-        ready_cond=$(yq < "$cr" '.status.conditions | map(select( .type == "Ready" and .status != "True"))' -o yaml)
+        ready_cond=$(
+            yq -o yaml < "$cr" \
+            '.status.conditions | map(select( .type == "Ready" and .status != "True"))'
+        )
 
         if [[ $ready_cond != "[]" ]]; then
             echo "$kind/$name is not Ready:"
             echo -e "$ready_cond"
-            (( ++rc ))
+            rc=$((rc+1))
         else
             echo "$kind/$name is Ready"
         fi
@@ -112,7 +124,7 @@ _assert_crs_of_a_kind_ready() {
 
 _check_ctlplane() {
     _assert_crs_of_a_kind_ready openstackcontrolplane
-    _assert_crs_of_a_kind_ready nova.openstack
+    _assert_crs_of_a_kind_ready nova
 }
 
 _check_dataplane() {
@@ -146,5 +158,3 @@ else
     print_commands
     exit 1
 fi
-
-
