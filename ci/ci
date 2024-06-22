@@ -48,7 +48,7 @@ download_logs() {
     )" tempest-pod.log || true
 }
 
-download_namespaces() {
+download_k8s_resources() {
     log_base="$1"
 
     rel_namespaces_path="ci-framework-data/logs/openstack-k8s-operators-openstack-must-gather/namespaces/"
@@ -69,17 +69,10 @@ download_namespaces() {
 
 }
 
-download_namespace() {
-    namespace="$1"
-    log_base="$2"
-
-    rel_namespaces_path="ci-framework-data/logs/openstack-k8s-operators-openstack-must-gather/namespaces/"
-
-    wget \
-        -q --show-progress -e robots=off \
-        --no-parent --recursive -R '*index.html*' \
-        "$log_base$rel_namespaces_path$namespace/"
-
+download_all() {
+    log_base=$1
+    download_logs "$log_base"
+    download_k8s_resources "$log_base"
 }
 
 _get_k8s_resources() {
