@@ -1,0 +1,150 @@
+#!/bin/bash
+
+set -euo pipefail
+shopt -s globstar
+
+
+download_logs() {
+    log_base="$1"
+    
+    rel_sos_path="ci-framework-data/logs/openstack-k8s-operators-openstack-must-gather/sos-reports/_all_nodes/"
+    rel_tempest_log_path="ci-framework-data/tests/test_operator/tempest-tests/tempest.log"
+
+    wget -q --show-progress -e robots=off -A '*.tar.xz' --no-parent --recursive --level=1 --no-directories "$log_base$rel_sos_path"
+
+
+    shopt -s nullglob
+
+    for f in *compute-*.tar.xz ; do
+        tar -ixf "$f" --exclude="dev"
+        rm "$f"
+    done
+
+    for f in *ceph-*.tar.xz ; do
+        tar ixf "$f" --exclude="dev"
+        rm "$f"
+    done
+
+
+    mkdir podlogs
+    for f in *.tar.xz ; do
+        dir=${f%"-UntarWithArg-i.tar.xz"}
+        mkdir "$dir"
+        tar ixf "$f" -C "$dir" --exclude="dev"
+        rm "$f"
+        poddir=${dir#"sosreport-"}
+        mkdir "podlogs/$poddir"
+        mv "$dir/podlogs/var/log/pods" "podlogs/$poddir/" || true
+    done
+
+    shopt -u nullglob
+
+    wget -q --show-progress "$log_base$rel_tempest_log_path" || true
+
+    ln -s $(eval "ls podlogs/*/pods/*/tempest-tests-tests-runner/0.log") tempest-pod.log || true
+}
+
+download_namespaces() {
+    log_base="$1"
+   
+    rel_namespaces_path="ci-framework-data/logs/openstack-k8s-operators-openstack-must-gather/namespaces/"
+    namespaces=(
+        "openstack"
+        "openstack-operators"
+        "cert-manager"
+        "openshift-machine-api"
+        "openshift-nmstate"
+    )
+    
+    printf "%s\n"  "${namespaces[@]}" | 
+        xargs -P "${#namespaces[@]}" -I {} \
+            wget -q --show-progress -e robots=off --no-parent --recursive -R '*index.html*' \
+                $log_base$rel_namespaces_path{}/
+
+
+}
+
+download_namespace() {
+    namespace="$1"
+    log_base="$2"
+
+    rel_namespaces_path="ci-framework-data/logs/openstack-k8s-operators-openstack-must-gather/namespaces/"
+ 
+    wget \
+        -q --show-progress -e robots=off \
+        --no-parent --recursive -R '*index.html*' \
+        "$log_base$rel_namespaces_path$namespace/"
+
+}
+
+_get_k8s_resources() {
+    namespace=$1
+    kind=$2  # e.g. statefulset, configmap, secret, cr/openstackcontrolplane
+
+    find ./logserver.rdoproject.org/**/namespaces/$namespace/$kind* -name "*.yaml"
+}
+
+_assert_crs_of_a_kind_ready() {
+    kind=$(echo $1 | tr '[:upper:]' '[:lower:]')
+
+    crs=$(_get_k8s_resources openstack crs/$kind)
+    if [[ -z $crs ]]; then
+        echo "No $kind CRs found"
+        return 1
+    fi
+
+    rc=0
+    for cr in $crs ; do
+        name=$(yq < "$cr" '.metadata.name' -o yaml)
+        kind=$(yq < "$cr" '.kind' -o yaml)
+        ready_cond=$(yq < "$cr" '.status.conditions | map(select( .type == "Ready" and .status != "True"))' -o yaml)
+
+        if [[ $ready_cond != "[]" ]]; then
+            echo "$kind/$name is not Ready:"
+            echo -e "$ready_cond"
+            (( ++rc ))
+        else
+            echo "$kind/$name is Ready"
+        fi
+    done
+    return $rc
+}
+
+_check_ctlplane() {
+    _assert_crs_of_a_kind_ready openstackcontrolplane
+    _assert_crs_of_a_kind_ready nova.openstack
+}
+
+_check_dataplane() {
+    _assert_crs_of_a_kind_ready openstackdataplanedeployment
+    _assert_crs_of_a_kind_ready openstackdataplanenodeset
+}
+
+analyze() {
+
+    _check_ctlplane
+    _check_dataplane
+
+    echo "All checks passed"
+}
+
+
+print_commands() {
+    echo "available commands:"
+    declare -F | cut -d ' ' -f 3 | sed -e 's/^/\t/'
+}
+
+
+if [[ $# -lt 1 ]]; then
+    print_commands
+    exit 1
+fi
+
+if declare -f "$1" > /dev/null ; then
+    "$@"
+else
+    print_commands
+    exit 1
+fi
+
+
