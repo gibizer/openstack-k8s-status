@@ -7,7 +7,7 @@ echo "# Post merge image build status" > $out
 
 while read -r repo; do
     name=$(echo "$repo"| cut -d '/' -f3)
-    if [ $name = "lib-common" ]; then
+    if [ "$name" = "lib-common" ]; then
             continue
     fi
     url="https://github.com/openstack-k8s-operators/$name/actions/workflows"
