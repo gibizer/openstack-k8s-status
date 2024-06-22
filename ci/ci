@@ -125,10 +125,24 @@ _check_dataplane() {
     _assert_crs_of_a_kind_ready openstackdataplanenodeset
 }
 
+_check_tempest() {
+    if ! grep "Failed: 0" tempest-pod.log > /dev/null; then
+        echo "Tempest failed:"
+        grep "... FAILED" tempest-pod.log
+        grep "Totals" -B 1 -A 7 tempest-pod.log
+
+        return 1
+    else
+        echo "Tempest passed"
+        grep "Totals" -B 1 -A 7 tempest-pod.log
+    fi
+}
+
 analyze() {
 
     _check_ctlplane
     _check_dataplane
+    _check_tempest
 
     echo "All checks passed"
 }
