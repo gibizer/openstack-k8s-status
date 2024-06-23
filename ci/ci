@@ -29,6 +29,10 @@ download_logs() {
         rm "$f"
     done
 
+    for f in *networker-*.tar.xz ; do
+        tar ixf "$f" --exclude="dev"
+        rm "$f"
+    done
 
     mkdir podlogs
     for f in *.tar.xz ; do
