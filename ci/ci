@@ -3,6 +3,8 @@
 set -euo pipefail
 shopt -s globstar
 
+K8S_RESOURCE_DIR="k8s"
+
 
 download_logs() {
     log_base="$1"
@@ -65,6 +67,7 @@ download_k8s_resources() {
             wget \
                 -q --show-progress -e robots=off \
                 --no-parent --recursive -R '*index.html*' \
+                -P "$K8S_RESOURCE_DIR" \
                 "$log_base$rel_namespaces_path"{}/
 
 }
@@ -82,7 +85,7 @@ _get_k8s_resources() {
     # we want globbing to happen
     # shellcheck disable=SC2086
     find \
-        ./logserver.rdoproject.org/**/namespaces/$namespace/$kind* \
+        ./"$K8S_RESOURCE_DIR"/**/namespaces/$namespace/$kind* \
         -name "*.yaml"
 }
 
