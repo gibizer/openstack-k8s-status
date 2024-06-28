@@ -34,24 +34,21 @@ download_logs() {
         rm "$f"
     done
 
-    mkdir podlogs
+    mkdir rotated-podlogs
     for f in *.tar.xz ; do
         dir=${f%"-UntarWithArg-i.tar.xz"}
         mkdir "$dir"
         tar ixf "$f" -C "$dir" --exclude="dev"
         rm "$f"
         poddir=${dir#"sosreport-"}
-        mkdir "podlogs/$poddir"
-        mv "$dir/podlogs/var/log/pods" "podlogs/$poddir/" || true
+        mkdir "rotated-podlogs/$poddir"
+        mv "$dir/podlogs/var/log/pods" "rotated-podlogs/$poddir/" || true
     done
 
     shopt -u nullglob
 
     wget -q --show-progress "$log_base$rel_tempest_log_path" || true
 
-    ln -s "$(
-        eval "ls podlogs/*/pods/*/tempest-tests-tests-runner/0.log"
-    )" tempest-pod.log || true
 }
 
 download_k8s_resources() {
@@ -74,6 +71,9 @@ download_k8s_resources() {
                 -P "$K8S_RESOURCE_DIR" \
                 "$log_base$rel_namespaces_path"{}/
 
+    ln -s "$(
+        eval ls k8s/**/logs/tempest-tests-tests-runner.log
+    )" tempest-pod.log || true
 }
 
 download_all() {
