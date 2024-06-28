@@ -71,9 +71,18 @@ download_k8s_resources() {
                 -P "$K8S_RESOURCE_DIR" \
                 "$log_base$rel_namespaces_path"{}/
 
-    ln -s "$(
-        eval ls k8s/**/logs/tempest-tests-tests-runner.log
-    )" tempest-pod.log || true
+    # remove the unnecessary directory tree nesting from wget
+    mv k8s/**/*-must-gather k8s/
+
+    shopt -s nullglob
+
+    for tempest in k8s/**/logs/tempest-tests-tests-runner.log ; do
+        [[ "$tempest" =~ ^.*/(tempest-tests.*)-.*/.*$ ]]
+        ln -s "$tempest" "${BASH_REMATCH[1]}-pod.log"
+    done
+
+    shopt -u nullglob
+
 }
 
 download_all() {
