@@ -142,15 +142,15 @@ _check_dataplane() {
 }
 
 _check_tempest() {
-    if ! grep "Failed: 0" tempest-pod.log > /dev/null; then
+    if ! grep "Failed: 0" tempest-*-pod.log > /dev/null; then
         echo "Tempest failed:"
-        grep "... FAILED" tempest-pod.log
-        grep "Totals" -B 1 -A 7 tempest-pod.log
+        grep "... FAILED" tempest-*-pod.log
+        grep "Totals" -B 1 -A 7 tempest-*-pod.log
 
         return 1
     else
         echo "Tempest passed"
-        grep "Totals" -B 1 -A 7 tempest-pod.log
+        grep "Totals" -B 1 -A 7 tempest-*-pod.log
     fi
 }
 
