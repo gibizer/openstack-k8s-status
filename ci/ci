@@ -67,7 +67,7 @@ download_logs() {
     for f in *.tar.xz ; do
         dir=${f%"-UntarWithArg-i.tar.xz"}
         mkdir "$dir"
-        tar ixf "$f" -C "$dir" --exclude="dev"
+        tar ixf "$f" -C "$dir" --exclude="dev" || true
         rm "$f"
         poddir=${dir#"sosreport-"}
         mkdir "rotated-podlogs/$poddir"
