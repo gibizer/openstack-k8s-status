@@ -132,8 +132,16 @@ _assert_crs_of_a_kind_ready() {
 }
 
 _check_ctlplane() {
-    _assert_crs_of_a_kind_ready openstackcontrolplane
-    _assert_crs_of_a_kind_ready nova
+    crs=(
+        barbican cinder glance heat horizon ironic keystone galera memcached
+        neutron nova ovn placementapi rabbitmq swift
+    )
+    if ! _assert_crs_of_a_kind_ready openstackcontrolplane ; then
+        for cr in "${crs[@]}" ; do
+            _assert_crs_of_a_kind_ready "$cr" || true
+        done
+        return 1
+    fi
 }
 
 _check_dataplane() {
