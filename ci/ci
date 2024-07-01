@@ -3,8 +3,37 @@
 set -euo pipefail
 shopt -s globstar
 
+USE_COLOR=${USE_COLOR:-true}
+HIDE_OK=${HIDE_OK:-false}
+
 K8S_RESOURCE_DIR="k8s"
 
+
+echo_ok() {
+    if $HIDE_OK ; then
+        return 0
+    fi
+
+    if ! $USE_COLOR ; then
+        echo "$*"
+    else
+        green=$(tput setaf 2)
+        clear=$(tput sgr0)
+
+        echo "$green$*$clear"
+    fi
+}
+
+echo_nok() {
+    if ! $USE_COLOR ; then
+        echo "$*"
+    else
+        red=$(tput setaf 1)
+        clear=$(tput sgr0)
+
+        echo "$red$*$clear"
+    fi
+}
 
 download_logs() {
     log_base="$1"
@@ -121,11 +150,11 @@ _assert_crs_of_a_kind_ready() {
         )
 
         if [[ $ready_cond != "[]" ]]; then
-            echo "$kind/$name is not Ready:"
+            echo_nok "$kind/$name is not Ready:"
             echo -e "$ready_cond"
             rc=$((rc+1))
         else
-            echo "$kind/$name is Ready"
+            echo_ok "$kind/$name is Ready"
         fi
     done
     return $rc
@@ -154,13 +183,13 @@ _check_tempest() {
     tempest_logs="tempest-*-pod.log"
 
     if ! grep "tempest run" $tempest_logs > /dev/null; then
-        echo "Tempest setup failed:"
+        echo_nok "Tempest setup failed:"
         grep "RETURN_VALUE=" $tempest_logs -B 20
         return 1
     fi
 
     if ! grep "Failed: 0" $tempest_logs > /dev/null; then
-        echo "Tempest failed:"
+        echo_nok "Tempest failed:"
         grep "... FAILED" $tempest_logs
         grep "Totals" -B 1 -A 7 $tempest_logs
 
@@ -177,7 +206,7 @@ analyze() {
     _check_dataplane
     _check_tempest
 
-    echo "All checks passed"
+    echo_ok "All checks passed"
 }
 
 
