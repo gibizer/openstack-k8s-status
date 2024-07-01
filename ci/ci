@@ -141,17 +141,26 @@ _check_dataplane() {
     _assert_crs_of_a_kind_ready openstackdataplanenodeset
 }
 
+# shellcheck disable=SC2086
 _check_tempest() {
-    if ! grep "Failed: 0" tempest-*-pod.log > /dev/null; then
-        echo "Tempest failed:"
-        grep "... FAILED" tempest-*-pod.log
-        grep "Totals" -B 1 -A 7 tempest-*-pod.log
+    tempest_logs="tempest-*-pod.log"
 
+    if ! grep "tempest run" $tempest_logs > /dev/null; then
+        echo "Tempest setup failed:"
+        grep "RETURN_VALUE=" $tempest_logs -B 20
         return 1
-    else
-        echo "Tempest passed"
-        grep "Totals" -B 1 -A 7 tempest-*-pod.log
     fi
+
+    if ! grep "Failed: 0" $tempest_logs > /dev/null; then
+        echo "Tempest failed:"
+        grep "... FAILED" $tempest_logs
+        grep "Totals" -B 1 -A 7 $tempest_logs
+
+        return 2
+    fi
+
+    echo "Tempest passed"
+    grep "Totals" -B 1 -A 7 $tempest_logs
 }
 
 analyze() {
