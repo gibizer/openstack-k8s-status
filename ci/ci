@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# set -x
 set -euo pipefail
 shopt -s globstar
 
@@ -134,6 +134,7 @@ _get_k8s_resources() {
 _assert_crs_of_a_kind_ready() {
     kind=$(echo "$1" | tr '[:upper:]' '[:lower:]')
 
+    local crs
     crs=$(_get_k8s_resources openstack "crs/$kind")
     if [[ -z $crs ]]; then
         echo "No $kind CRs found"
@@ -161,6 +162,7 @@ _assert_crs_of_a_kind_ready() {
 }
 
 _check_ctlplane() {
+    local crs
     crs=(
         barbican cinder glance heat horizon ironic keystone galera memcached
         neutron nova ovn placementapi rabbitmq swift
