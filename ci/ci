@@ -188,33 +188,51 @@ _check_dataplane() {
     _assert_crs_of_a_kind_ready openstackdataplanenodeset
 }
 
-# shellcheck disable=SC2086
 _check_tempest() {
-    tempest_logs="tempest-*-pod.log"
+    local tempest_log
+    tempest_log=$1
 
-    if ! grep "tempest run" $tempest_logs > /dev/null; then
-        echo_nok "Tempest setup failed:"
-        grep "RETURN_VALUE=" $tempest_logs -B 20
+    echo
+    echo "Tempest: $tempest_log"
+
+    if ! grep "tempest run" "$tempest_log" > /dev/null; then
+        echo_nok "setup failed:"
+        grep "RETURN_VALUE=" "$tempest_log" -B 20
         return 1
     fi
-
-    if ! grep "Failed: 0" $tempest_logs > /dev/null; then
-        echo_nok "Tempest failed:"
-        grep "... FAILED" $tempest_logs
-        grep "Totals" -B 1 -A 7 $tempest_logs
-
+    if ! grep "Failed: 0" "$tempest_log" > /dev/null; then
+        echo_nok "test failed:"
+        grep "... FAILED" "$tempest_log"
+        grep "Totals" -B 1 -A 7 "$tempest_log"
         return 2
     fi
 
-    echo "Tempest passed"
-    grep "Totals" -B 1 -A 7 $tempest_logs
+}
+
+
+# shellcheck disable=SC2086
+_check_tempests() {
+    tempest_logs="tempest-*-pod.log"
+
+    local rc
+    rc=0
+    for tempest in $tempest_logs; do
+        if _check_tempest $tempest; then
+            echo_ok "passed"
+            grep "Totals" -B 1 -A 7 $tempest
+        else
+            rc=$((rc+1))
+        fi
+    done
+
+    return $rc
 }
 
 analyze() {
 
     _check_ctlplane
     _check_dataplane
-    _check_tempest
+    _check_tempests
 
     echo_ok "All checks passed"
 }
