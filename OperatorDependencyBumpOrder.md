@@ -3,7 +3,6 @@
 ## Batch 1
 * [github.com/openstack-k8s-operators/infra-operator](http://github.com/openstack-k8s-operators/infra-operator)
 * [github.com/openstack-k8s-operators/mariadb-operator](http://github.com/openstack-k8s-operators/mariadb-operator)
-* [github.com/openstack-k8s-operators/openstack-ansibleee-operator](http://github.com/openstack-k8s-operators/openstack-ansibleee-operator)
 * [github.com/openstack-k8s-operators/openstack-baremetal-operator](http://github.com/openstack-k8s-operators/openstack-baremetal-operator)
 * [github.com/openstack-k8s-operators/test-operator](http://github.com/openstack-k8s-operators/test-operator)
 ## Batch 2
